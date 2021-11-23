@@ -59,19 +59,28 @@ function Weather_container(props){
 }
 
 function Weather_table(props){
-
+  console.log("wather_table")
   return(
         <tr>
             <td>{props.name}</td>
             <td>{props.fromtime}<br></br>{props.totime}</td>
             <td>{props.periodno}</td>
             <td>{props.periodname}</td>
-            <td>{props.TUNIT}</td>
-            <td>{props.TVALUE}</td>
-
         </tr>
     );
 }
+
+function Forecast_table(props){
+  console.log("forecast_table")
+  return(
+    <tr>
+      <td>{props.TUNIT}</td>
+      <td>{props.TVALUE}</td>
+    </tr>
+  );
+}
+
+
 
 function Chat_post(props){
   return(
@@ -167,7 +176,6 @@ class App extends React.Component{
 
   //Function to fetch data when serching
   async handleClick() {
-
     const responseInfo = await fetch("Avancerad-Webb-API/Ort.php",{
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
@@ -197,7 +205,6 @@ class App extends React.Component{
     })
     .then((response) => response.json()).then(forecasts => {
           this.setState({forecasts:forecasts});  
-          console.log(forecasts)
     });
 
     const responseComment = await fetch("Avancerad-Webb-API/Comments.php",{
@@ -257,16 +264,22 @@ class App extends React.Component{
           </tr>
         </thead>
         <tbody>          
-            {Array.isArray(arr) && arr.forEach((v,i) => {
-              <Weather_table
-                name={v.name}
-                fromtime={v.fromtime}
-                totime={v.totime}
-                periodno={v.periodno}
-                periodname={v.periodname}
-                TUNIT={v.forecast.TUNIT}
+          {Object.keys(this.state.forecasts).map(key=> 
+              <Weather_table key={key}
+                name={this.state.forecasts[key].name}
+                fromtime={this.state.forecasts[key].fromtime}
+                totime={this.state.forecasts[key].totime}
+                periodno={this.state.forecasts[key].periodno}
+                periodname={this.state.forecasts[key].periodname}
+                
+                {...this.state.forecasts.forecast && Object.keys(this.state.forecasts.forecast).map(key =>
+                  <Forecast_table key={key}
+                    TUNIT={this.state.forecasts.forecast[key].TUNIT}
+                    TVALUE={this.state.forecasts.forecast[key].TVALUE}
+                  />
+                )}
               />
-            })}    
+          )}
         </tbody>  
       </table>
       <div className="chat_icon_div" onClick={this.handleClickDisplayChat}>
