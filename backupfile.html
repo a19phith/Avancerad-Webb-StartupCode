@@ -14,25 +14,79 @@ class Product extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      color: props.color,
-      name: props.name
-    };  
+        data:{
+          name:"",
+          about:"",
+          geodata:{
+            ALTITUDE:"",
+            GEOBASE:""
+          },
+        },
+        data2:{
+          name:"",
+          TUNIT:"",
+          fromtime:"",
+          forecast:{
+            fromtime:""
+          },
+        },
+        ort:"Arjeplog"
+    };
+
     this.handleClick = this.handleClick.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
-  handleClick() {
+  
+  handleChange(e) {
+    this.setState({ort: e.target.value});  
+  }
+
+  async handleClick() {
     alert("Hello!");
-    this.setState({color:"Green"});  
+
+    const responseOrt = await fetch("Avancerad-Webb-API/Ort.php",{
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body:JSON.stringify({ort:this.state.ort})
+    })
+    .then((response) => response.json()).then(ort => {
+        this.setState({data:ort});  
+        console.log(ort);
+    });
+
+    const responseForecast = await fetch("Avancerad-Webb-API/Forecast.php",{
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body:JSON.stringify({ort:this.state.ort})
+    })
+    .then((response) => response.json()).then(forecast => {
+        this.setState({data2:forecast[0]}); 
+        console.log(forecast); 
+    });
+
+
   }  
   render() {
     return (
-      <button onClick={this.handleClick}>{this.state.name} {this.state.color}</button>
+      <div>
+        <input onChange={this.handleChange} />
+        <button onClick={this.handleClick}>Click to Fetch</button>
+        <p>{this.state.data.name}</p>
+        <p>{this.state.data.type}</p>
+        <p>{this.state.data.country}</p>
+        <p>{this.state.data.about}</p>
+        <p>{this.state.data.geodata.ALTITUDE}</p>
+        <p>{this.state.data.geodata.GEOBASE}</p>
+        <p>{this.state.data2.name}</p>
+        <p>{this.state.data2.TUNIT}</p>
+        <p>{this.state.data2.forecast.TUNIT}</p>
+      </div>
     );
   }
 }
 
 ReactDOM.render(
-  <Product name="car A" color="Red" />,  document.getElementById('content')
-  
+  <Product />,  document.getElementById('content')
 );
 
 </script>

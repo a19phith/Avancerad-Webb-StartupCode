@@ -46,6 +46,7 @@ body {
   margin: 30px 0 30px 30px;
   padding: 20px 20px 20px 20px;
   box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+  display: flex;
 }
 .climatecode_icon{
   border: 2px solid black;

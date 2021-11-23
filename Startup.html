@@ -24,45 +24,51 @@
 const urlParams = new URLSearchParams(window.location.search);
 const ort = urlParams.get('ort');
 if(ort!=null) alert(ort);
-
 function Weather_container(props){
   return (
     <div className="box">
       <h1>{props.name}</h1>
       <p>{props.type}</p>
+      <p>{props.climatecode}</p>
       <p>{props.country}</p>
-      <p>{props.geolocation}</p>
       <p>{props.about}</p>
       <p>{props.province}</p>
       <p>{props.county}</p>
       <p>{props.municipality}</p>
-      <p>{props.climate}</p>
-      <p>{props.charter}</p>
+      <p>{props.postalcode}</p>
+      <p>{props.areacode}</p>
+      <div style={{
+        backgroundColor: "#eee",
+        position: "relative",
+        width: "200px",
+        left: "600px",
+        padding: "10px 10px 10px 10px",
+        boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
+
+      }}>Geodata
+        <p>ALTITUDE: {props.ALTITUDE}°</p>
+        <p>LATITUDE: {props.LATITUDE}°</p>
+        <p>LONGITUDE: {props.LONGITUDE}°</p>
+        <p>GEOBASE: {props.GEOBASE}</p>
+        <p>GEOBASEID: {props.GEOBASEID}</p>
+      </div>
       <p>{props.postalcode}</p>
       <p>{props.areacode}</p>
     </div>
   );
 }
 
-function Climatecode(props){
-  return(
-    <div className="box">
-      <p>Climate Code: {props.code} - </p>
-      <span className="climatecode_icon" style={{backgroundColor:props.color}}></span>
-      <p>{props.name}</p>
-    </div>
-  );
-}
-
 function Weather_table(props){
+
   return(
         <tr>
-          <td>{props.name}</td>
-          <td>{props.fromtime}</td>
-          <td>{props.totime}</td>
-          <td>{props.periodno}</td>
-          <td>{props.periodname}</td>
-          <td>{props.auxdata}</td>
+            <td>{props.name}</td>
+            <td>{props.fromtime}<br></br>{props.totime}</td>
+            <td>{props.periodno}</td>
+            <td>{props.periodname}</td>
+            <td>{props.TUNIT}</td>
+            <td>{props.TVALUE}</td>
+
         </tr>
     );
 }
@@ -72,101 +78,214 @@ function Chat_post(props){
     <div className="chat_comment">
           <h2>{props.location}</h2>
           <p style={{fontSize:"14px"}}>{props.content}</p>
-          <p>Author ID: {props.author}</p>
           <div className="like_btn_border">
             <div className="like_btn"><img src="like_btn.png" className="like_btn_icon"/>{props.user}</div>
           </div>          
-          <div style={{opacity: "70%", bottom:"10px"}}>Posted: {props.posted}</div>
+          <div style={{opacity: "70%", bottom:"10px"}}>
+            Posted: {props.posted}
+            <br></br>
+            <span style={{fontSize:"14px"}}>{props.username} - {props.email}</span>
+            <br></br> 
+            <span style={{fontSize:"14px"}}> Comment ID: {props.commentid}</span>
+            <span style={{fontSize:"14px", position:"absolute",bottom:"10px",right:"10px"}}> Reply To: {props.replyto}</span>
+
+          </div>
         </div>
     );
 }
-
-const data = [
-  { name:'jönköping', fromtime: '1', totime: '15', periodno: '4,2 mm', periodname: '1 m/s', auxdata: '07:30'},
-  { name:'', fromtime: '2', totime: '13', periodno: '7,4 mm', periodname: '5 m/s', auxdata: '07:32'},
-  { name:'', fromtime: '3', totime: '10', periodno: '3,0 mm', periodname: '2 m/s', auxdata: '07:35'},
-  { name:'', fromtime: '3', totime: '10', periodno: '3,0 mm', periodname: '2 m/s', auxdata: '07:35', comment_id:"123", user_id:"0101", date:"01-21-2012"}
-];
-
-const climate =[
-  { code:'AF', name: 'Hot semi-arid (steppe) climate Arid Steppe Hot', color: '#FF6E6E'}
-]
-
-const data_comment = [
-  { user: "2", id:"1111", location:"Grums", replyto:"", author:"1", content:"Här uppe i norr är det så kallt denna veckan så att snuset fryser i fickan och värmlänningarna klagar på odören från bruket. Veklingar.", posted:"2021-11-01 09:30" },
-  { user: "1",id:"1111", location:"Grums", replyto:"", author:"2", content:"aknade upp av stanken från pappersbruket som vinden tryckte framför sig längs älven.", posted:"2021-11-01 09:30" },
-  { user: "2",id:"1111", location:"Grums", replyto:"", author:"3", content:"aknade upp av stanken från pappersbruket som vinden tryckte framför sig längs älven.", posted:"2021-11-01 09:30" },
-  { user: "3",id:"1111", location:"Grums", replyto:"", author:"4", content:"aknade upp av stanken från pappersbruket som vinden tryckte framför sig längs älven.", posted:"2021-11-01 09:30" },
-  { user: "1",id:"1112", location:"Jönköping", replyto:"", author:"5", content:"vaknade upp som vinden tryckte framför sig längs älven.", posted:"2021-11-01 09:33" }
-];
 
 class App extends React.Component{
   constructor (props){
     super(props);
     this.state ={
-      display : props.display
+      display : props.display,
+      info:{
+        name:"",
+        type:"",
+        country:"",
+        geolocation:"",
+        about:"",
+        province:"",
+        county:"",
+        municipality:"",
+        geodata:{
+          ALTITUDE:"",
+          LATITUDE:"",
+          LONGITUDE:"",
+          GEOBASE:"",
+          GEOBASEID:"",
+        },
+        postalcode:"",
+        areacode:""
+      },
+      climatecode:{
+        code: "",
+        name: "",
+        color: ""
+      },
+      forecasts:{
+        name: "",
+        fromtime: "",
+        totime: "",
+        periodno: "",
+        periodname: "",
+        forecast: {
+          TUNIT: "",
+          TVALUE :"",
+          ALTUNIT: "",
+          ALTVALUE: "",
+          NUMBER: "",
+          WSYMB3NUMBER: "",
+          FNAME: "",
+          RUNIT: "",
+          RVALUE: "",
+          DEG: "",
+          CODE: "",
+          NAME: "",
+          MPS: "",
+          NAME: "",
+          UNIT: "",
+          VALUE: ""
+        }
+      },
+      comment:{
+        commentid: "",
+        location: "",
+        replyto: "",
+        author: "",
+        content: "",
+        posted: "",
+        username: "",
+        email: "",
+        user:""
+      },
+      ort:ort
     };
+    this.handleClickDisplayChat = this.handleClickDisplayChat.bind(this);
     this.handleClick = this.handleClick.bind(this);
   }
-  handleClick(){
+
+  //Function to fetch data when serching
+  async handleClick() {
+
+    const responseInfo = await fetch("Avancerad-Webb-API/Ort.php",{
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body:JSON.stringify({ort:this.state.ort})
+    })
+    .then((response) => response.json()).then(info => {
+        this.setState({info:info});  
+    });
+
+    const responseClimateCode = await fetch("Avancerad-Webb-API/Climatecodes.php",{
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body:JSON.stringify({ort:this.state.ort})
+    })
+    .then((response) => response.json()).then(climatecode => {
+      for (let i = 0; i < climatecode.length; i++) {
+        if(climatecode[i].code == this.state.info.climatecode){
+          this.setState({climatecode:climatecode[i]});  
+        } 
+      }
+    });
+
+    const responseForecast = await fetch("Avancerad-Webb-API/Forecast.php",{
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body:JSON.stringify({ort:this.state.ort})
+    })
+    .then((response) => response.json()).then(forecasts => {
+          this.setState({forecasts:forecasts});  
+          console.log(forecasts)
+    });
+
+    const responseComment = await fetch("Avancerad-Webb-API/Comments.php",{
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body:JSON.stringify({ort:this.state.ort})
+    })
+    .then((response) => response.json()).then(comment => {
+        this.setState({comment:comment});  
+    });
+  } 
+
+  handleClickDisplayChat(){
     if(this.state.display == "block"){
       this.setState({display:"none"});
     }else{
       this.setState({display:"block"});
     }
   }
+  componentDidMount() {
+    window.addEventListener('load', this.handleClick);
+ }
+  
   render(){
+    let arr = this.state.forecasts;
     return(
     <div>
       <Weather_container 
-        name="jönköping" 
-        about="Jönköping is a city in southern"
+        name={this.state.info.name} 
+        type={this.state.info.type} 
+        country={this.state.info.country} 
+        about={this.state.info.about}
+        province={this.state.info.province}
+        municipality={this.state.info.municipality}
+        climatecode={this.state.info.climatecode}
+        postalcode={this.state.info.postalcode}
+        areacode={this.state.info.areacode}
+        ALTITUDE={this.state.info.geodata.ALTITUDE}
+        LATITUDE={this.state.info.geodata.LATITUDE}
+        LONGITUDE={this.state.info.geodata.LONGITUDE}
+        GEOBASE={this.state.info.geodata.GEOBASE}
+        GEOBASEID={this.state.info.geodata.GEOBASEID}
       />
-      {climate.map(climate =>
-        <Climatecode
-          code={climate.code}
-          name={climate.name} 
-          color={climate.color} 
-        />    
-      )}  
+      <div className="box">
+        <p>Climate Code: {this.state.climatecode.code} - </p>
+        <span className="climatecode_icon" style={{backgroundColor:this.state.climatecode.color}}></span>
+        <p>{this.state.climatecode.name}</p>
+      </div>
       <table className="box">
         <thead>
           <tr>
-            <th scope="row"></th>
-            <th scope="row">From</th>
-            <th scope="row">To</th>
+            <th scope="row">City</th>
+            <th scope="row">From/To</th>
             <th scope="row">Periodno</th>
             <th scope="row">During</th>
             <th scope="row">auxdata</th>
           </tr>
         </thead>
-        <tbody>
-          {data.map(data =>
-            <Weather_table
-              name={data.name}
-              fromtime={data.fromtime} 
-              totime={data.totime} 
-              periodno={data.periodno} 
-              periodname={data.periodname} 
-              auxdata={data.auxdata} 
-            />
-          )}
-        </tbody>
+        <tbody>          
+            {Array.isArray(arr) && arr.forEach((v,i) => {
+              <Weather_table
+                name={v.name}
+                fromtime={v.fromtime}
+                totime={v.totime}
+                periodno={v.periodno}
+                periodname={v.periodname}
+                TUNIT={v.forecast.TUNIT}
+              />
+            })}    
+        </tbody>  
       </table>
-      <div className="chat_icon_div" onClick={this.handleClick}>
+      <div className="chat_icon_div" onClick={this.handleClickDisplayChat}>
         <img src="chat_icon.png" className="chat_icon"/>
         <div className="chat_box" style={{display:this.state.display}}>
-        <h1>Chat</h1>
-          {data_comment.map(chat =>
-            <Chat_post
-              id={chat.id}
-              location={chat.location}
-              replyto={chat.replyto}
-              author={chat.author}
-              content={chat.content}
-              posted={chat.posted}
-              user={chat.user}
-            />  
+          <h1>Chat</h1>
+          {Object.keys(this.state.comment).map(key=> 
+            <Chat_post key={key}
+              commentid={this.state.comment[key].commentid}
+              location={this.state.comment[key].location}
+              replyto={this.state.comment[key].replyto}
+              author={this.state.comment[key].author}
+              content={this.state.comment[key].content}
+              posted={this.state.comment[key].posted}
+              username={this.state.comment[key].username}
+              email={this.state.comment[key].email}
+              user={this.state.comment[key].user}
+              replyto={this.state.comment[key].replyto}
+            />
           )}
         </div>
       </div>
