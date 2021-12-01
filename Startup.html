@@ -124,13 +124,13 @@ class App extends React.Component{
         name: "",
         color: ""
       },
-      forecasts:{0: {
+      forecasts:{0:{
         name: "",
         fromtime: "",
         totime: "",
         periodno: "",
         periodname: "",
-        forecast: {
+        forecast:{
           TUNIT: "",
           TVALUE :"",
           ALTUNIT: "",
@@ -175,28 +175,30 @@ class App extends React.Component{
     })
     .then((response) => response.json()).then(info => {
         this.setState({info:info});  
+        console.log(info);
     });
 
-    const responseClimateCode = await fetch("Avancerad-Webb-API/Climatecodes.php",{
-        method: 'POST',
+    fetch("http://localhost:5000/climatecodes",{
+        method: 'GET',
         headers: { 'Content-Type': 'application/json'},
-        body:JSON.stringify({ort:this.state.ort})
+
     })
     .then((response) => response.json()).then(climatecode => {
       for (let i = 0; i < climatecode.length; i++) {
         if(climatecode[i].code == this.state.info.climatecode){
           this.setState({climatecode:climatecode[i]});  
+          console.log(climatecode);
         } 
       }
-    });
+    }); 
 
-    const responseForecast = await fetch("Avancerad-Webb-API/Forecast.php",{
-        method: 'POST',
+    fetch("http://localhost:5000/forecasts/" + ort,{
+        method: 'GET',
         headers: { 'Content-Type': 'application/json'},
-        body:JSON.stringify({ort:this.state.ort})
     })
     .then((response) => response.json()).then(forecasts => {
-          this.setState({forecasts:forecasts});
+      console.log(forecasts)
+      this.setState({forecasts:forecasts}); 
     });
 
     const responseComment = await fetch("Avancerad-Webb-API/Comments.php",{
