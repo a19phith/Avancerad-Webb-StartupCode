@@ -59,7 +59,9 @@ function Weather_container(props){
 }
 
 function Weather_table(props){
-  return(
+  //console.log(props);
+
+    return(
         <tr>
             <td>{props.fromtime}<br></br>{props.totime}</td>
             <td>{props.periodno}</td>
@@ -69,6 +71,7 @@ function Weather_table(props){
             <td>{props.NAME} {props.MPS}m/s</td>
         </tr>
     );
+
 }
 
 
@@ -175,36 +178,32 @@ class App extends React.Component{
     })
     .then((response) => response.json()).then(info => {
         this.setState({info:info});  
-        console.log(info);
     });
 
     fetch("http://localhost:5000/climatecodes",{
         method: 'GET',
         headers: { 'Content-Type': 'application/json'},
-
     })
     .then((response) => response.json()).then(climatecode => {
       for (let i = 0; i < climatecode.length; i++) {
         if(climatecode[i].code == this.state.info.climatecode){
           this.setState({climatecode:climatecode[i]});  
-          console.log(climatecode);
         } 
       }
     }); 
-
     fetch("http://localhost:5000/forecasts/" + ort,{
         method: 'GET',
         headers: { 'Content-Type': 'application/json'},
     })
     .then((response) => response.json()).then(forecasts => {
+      //console.log(forecasts.forecast.TVALUE)
       console.log(forecasts)
-      this.setState({forecasts:forecasts}); 
+      this.setState({forecasts:[forecasts]}); 
     });
 
-    const responseComment = await fetch("Avancerad-Webb-API/Comments.php",{
-        method: 'POST',
+    fetch("http://localhost:5000/users",{
+        method: 'GET',
         headers: { 'Content-Type': 'application/json'},
-        body:JSON.stringify({ort:this.state.ort})
     })
     .then((response) => response.json()).then(comment => {
         this.setState({comment:comment});  
@@ -221,9 +220,8 @@ class App extends React.Component{
   componentDidMount() {
     window.addEventListener('load', this.handleClick);
  }
-  
+ 
   render(){
-    let arr = this.state.forecasts;
     return(
     <div>
       <Weather_container 
@@ -258,9 +256,9 @@ class App extends React.Component{
             <th scope="row">Wind</th>
           </tr>
         </thead>
-        <tbody>          
-          {
-            Object.keys(this.state.forecasts).map(key=> 
+        <tbody>
+ 
+          {Object.keys(this.state.forecasts).map(key=> 
               <Weather_table key={key}
                 fromtime={this.state.forecasts[key].fromtime}
                 totime={this.state.forecasts[key].totime}
@@ -273,7 +271,11 @@ class App extends React.Component{
                 NAME={this.state.forecasts[key].forecast["NAME"]}
                 MPS={this.state.forecasts[key].forecast["MPS"]}
               />
+              
           )}
+              {
+              console.log(this.state.forecasts.forecast)
+              }
         </tbody>  
       </table>
       <div className="chat_icon_div" onClick={this.handleClickDisplayChat}>
